@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	pan "go-bdfs/pan"
+	pan "github.com/baowuhe/go-bdfs/pan"
 
 	"github.com/spf13/pflag"
 )
