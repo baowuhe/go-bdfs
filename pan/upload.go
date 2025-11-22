@@ -32,13 +32,13 @@ func (c *Client) UploadFile(localFilePath, remoteFilePath string) error {
 	fileName := fileInfo.Name()
 
 	// Ensure remote path is valid
-	if err := c.ensureRemoteDirExists(filepath.Dir(remoteFilePath)); err != nil {
+	if err := c.EnsureRemoteDirExists(filepath.Dir(remoteFilePath)); err != nil {
 		return err
 	}
 
 	// Calculate slice MD5s (Baidu typically uses 4MB slices)
 	const sliceSize = 4 * 1024 * 1024 // 4MB
-	sliceMD5s, err := calculateSliceMD5(localFilePath, sliceSize)
+	sliceMD5s, err := CalculateSliceMD5(localFilePath, sliceSize)
 	if err != nil {
 		return fmt.Errorf("failed to calculate slice MD5s: %w", err)
 	}

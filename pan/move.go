@@ -42,7 +42,7 @@ func (c *Client) MoveFile(sourcePath, destDir string) error {
 		{
 			Path:    sourcePath,
 			Dest:    destDir,
-			NewName: getSourceFileName(sourcePath),
+			NewName: GetSourceFileName(sourcePath),
 		},
 	}
 	return c.MoveFiles(moveRequests)
@@ -121,7 +121,7 @@ func (c *Client) MoveFiles(moveRequests []MoveRequest) error {
 	}
 
 	if moveResponse.Errno != 0 {
-		return fmt.Errorf("move API returned error code %d: %s", moveResponse.Errno, getMoveErrorMessage(moveResponse.Errno))
+		return fmt.Errorf("move API returned error code %d: %s", moveResponse.Errno, GetMoveErrorMessage(moveResponse.Errno))
 	}
 
 	// Check if any individual files failed to move
@@ -140,8 +140,8 @@ func (c *Client) MoveFiles(moveRequests []MoveRequest) error {
 	return nil
 }
 
-// getMoveErrorMessage returns a human-readable error message for common errno values
-func getMoveErrorMessage(errno int) string {
+// GetMoveErrorMessage returns a human-readable error message for common errno values
+func GetMoveErrorMessage(errno int) string {
 	switch errno {
 	case 0:
 		return "Success"

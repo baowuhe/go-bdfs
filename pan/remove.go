@@ -98,7 +98,7 @@ func (c *Client) RemoveFiles(filePaths []string) error {
 	}
 
 	if deleteResponse.Errno != 0 {
-		return fmt.Errorf("delete API returned error code %d: %s", deleteResponse.Errno, getErrorMessage(deleteResponse.Errno))
+		return fmt.Errorf("delete API returned error code %d: %s", deleteResponse.Errno, GetErrorMessage(deleteResponse.Errno))
 	}
 
 	// Check if any individual files failed to delete
@@ -116,8 +116,8 @@ func (c *Client) RemoveFiles(filePaths []string) error {
 	return nil
 }
 
-// getErrorMessage returns a human-readable error message for common errno values
-func getErrorMessage(errno int) string {
+// GetErrorMessage returns a human-readable error message for common errno values
+func GetErrorMessage(errno int) string {
 	switch errno {
 	case 0:
 		return "Success"

@@ -111,7 +111,7 @@ func (c *Client) RenameFiles(renameRequests []RenameRequest) error {
 	}
 
 	if renameResponse.Errno != 0 {
-		return fmt.Errorf("rename API returned error code %d: %s", renameResponse.Errno, getRenameErrorMessage(renameResponse.Errno))
+		return fmt.Errorf("rename API returned error code %d: %s", renameResponse.Errno, GetRenameErrorMessage(renameResponse.Errno))
 	}
 
 	// Check if any individual files failed to rename
@@ -130,8 +130,8 @@ func (c *Client) RenameFiles(renameRequests []RenameRequest) error {
 	return nil
 }
 
-// getRenameErrorMessage returns a human-readable error message for common errno values
-func getRenameErrorMessage(errno int) string {
+// GetRenameErrorMessage returns a human-readable error message for common errno values
+func GetRenameErrorMessage(errno int) string {
 	switch errno {
 	case 0:
 		return "Success"

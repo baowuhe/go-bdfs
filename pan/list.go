@@ -91,13 +91,13 @@ func (c *Client) Walk(rootPath string) (<-chan FileInfo, <-chan error) {
 
 	go func() {
 		defer close(fileChan)
-		c.walkRecursive(rootPath, fileChan, errChan)
+		c.WalkRecursive(rootPath, fileChan, errChan)
 	}()
 
 	return fileChan, errChan
 }
 
-func (c *Client) walkRecursive(path string, fileChan chan<- FileInfo, errChan chan<- error) {
+func (c *Client) WalkRecursive(path string, fileChan chan<- FileInfo, errChan chan<- error) {
 	files, err := c.ListFiles(path)
 	if err != nil {
 		errChan <- err
@@ -110,7 +110,7 @@ func (c *Client) walkRecursive(path string, fileChan chan<- FileInfo, errChan ch
 		// If it's a directory, recurse into it
 		if file.IsDir == 1 {
 			subPath := file.Path
-			c.walkRecursive(subPath, fileChan, errChan)
+			c.WalkRecursive(subPath, fileChan, errChan)
 		}
 	}
 }

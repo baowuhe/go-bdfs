@@ -572,8 +572,8 @@ func (c *Client) RefreshToken() error {
 	return c.SaveTokens()
 }
 
-// calculateMD5 calculates the MD5 hash of a given file
-func calculateMD5(filePath string) (string, error) {
+// CalculateMD5 calculates the MD5 hash of a given file
+func CalculateMD5(filePath string) (string, error) {
 	file, err := os.Open(filePath)
 	if err != nil {
 		return "", fmt.Errorf("failed to open file %s: %w", filePath, err)
@@ -588,8 +588,8 @@ func calculateMD5(filePath string) (string, error) {
 	return fmt.Sprintf("%x", hash.Sum(nil)), nil
 }
 
-// calculateSliceMD5 calculates MD5 hashes for fixed-size slices of a file
-func calculateSliceMD5(filePath string, sliceSize int64) ([]string, error) {
+// CalculateSliceMD5 calculates MD5 hashes for fixed-size slices of a file
+func CalculateSliceMD5(filePath string, sliceSize int64) ([]string, error) {
 	file, err := os.Open(filePath)
 	if err != nil {
 		return nil, fmt.Errorf("failed to open file %s: %w", filePath, err)
@@ -619,18 +619,18 @@ func calculateSliceMD5(filePath string, sliceSize int64) ([]string, error) {
 	return md5List, nil
 }
 
-// ensureRemoteDirExists verifies the remote directory path is valid.
+// EnsureRemoteDirExists verifies the remote directory path is valid.
 // Baidu Pan's API typically creates parent directories if they don't exist during upload,
 // so this function primarily serves to validate the path format.
-func (c *Client) ensureRemoteDirExists(remotePath string) error {
+func (c *Client) EnsureRemoteDirExists(remotePath string) error {
 	if !strings.HasPrefix(remotePath, "/") {
 		return fmt.Errorf("remote path must be an absolute path starting with '/'")
 	}
 	return nil
 }
 
-// getSourceFileName extracts the filename from a path
-func getSourceFileName(path string) string {
+// GetSourceFileName extracts the filename from a path
+func GetSourceFileName(path string) string {
 	parts := strings.Split(strings.Trim(path, "/"), "/")
 	if len(parts) == 0 {
 		return ""

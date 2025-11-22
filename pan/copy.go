@@ -46,7 +46,7 @@ func (c *Client) CopyFile(sourcePath, destPath string) error {
 	// If destPath is a directory, use the source filename
 	if strings.HasSuffix(destPath, "/") || isDirectoryPath(destPath) {
 		destDir = destPath
-		newName = getSourceFileName(sourcePath)
+		newName = GetSourceFileName(sourcePath)
 	}
 
 	copyRequests := []CopyRequest{
@@ -129,7 +129,7 @@ func (c *Client) CopyFiles(copyRequests []CopyRequest) error {
 	}
 
 	if copyResponse.Errno != 0 {
-		return fmt.Errorf("copy API returned error code %d: %s", copyResponse.Errno, getCopyErrorMessage(copyResponse.Errno))
+		return fmt.Errorf("copy API returned error code %d: %s", copyResponse.Errno, GetCopyErrorMessage(copyResponse.Errno))
 	}
 
 	// Check if any individual files failed to copy
@@ -160,8 +160,8 @@ func isDirectoryPath(path string) bool {
 	return strings.HasSuffix(path, "/") || filepath.Ext(path) == ""
 }
 
-// getCopyErrorMessage returns a human-readable error message for common errno values
-func getCopyErrorMessage(errno int) string {
+// GetCopyErrorMessage returns a human-readable error message for common errno values
+func GetCopyErrorMessage(errno int) string {
 	switch errno {
 	case 0:
 		return "Success"
