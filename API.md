@@ -34,9 +34,9 @@ type Client struct {
 
 ### NewClient
 ```go
-func NewClient(clientID, clientSecret string) *Client
+func NewClient(clientID, clientSecret, tokenPath string) *Client
 ```
-Creates a new Baidu Pan client with the provided client ID and client secret. Sets up HTTP clients with appropriate timeouts.
+Creates a new Baidu Pan client with the provided client ID, client secret, and token file path. Sets up HTTP clients with appropriate timeouts.
 
 ### GetDeviceCode
 ```go
@@ -86,11 +86,6 @@ func (c *Client) RefreshToken() error
 ```
 Attempts to refresh the access token using the refresh token.
 
-### LoadConfig
-```go
-func LoadConfig() (*Config, error)
-```
-Loads configuration from environment variables or TOML file. First tries to load from environment variables `BDU_PAN_CLIENT_ID` and `BDU_PAN_CLIENT_SECRET`. If not set, looks for a `config.toml` file in the user's home directory.
 
 ### HasRefreshToken
 ```go
@@ -555,18 +550,13 @@ type DiskInfoResponse struct {
 }
 ```
 
-### Config and BaiduConfig
-Structures for configuration loading from environment variables or TOML file.
+### Config
+Structure for configuration loading from environment variables or TOML file.
 ```go
 type Config struct {
-    ClientID     string      `toml:"client_id"`
-    ClientSecret string      `toml:"client_secret"`
-    Baidu        BaiduConfig `toml:"baidu,omitempty"`
-}
-
-type BaiduConfig struct {
     ClientID     string `toml:"client_id"`
     ClientSecret string `toml:"client_secret"`
+    TokenPath    string `toml:"token_path"`
 }
 ```
 

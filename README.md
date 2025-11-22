@@ -48,33 +48,33 @@ The binary will be available in the `build/` directory.
 
 ## Configuration
 
-The tool requires your Baidu API credentials to work. You can configure them in two ways:
+The tool requires your Baidu API credentials and token path to work. You can configure them in two ways:
 
 ### Environment Variables
 
 Set the following environment variables:
 
 ```bash
-export BDU_PAN_CLIENT_ID="your_client_id"
-export BDU_PAN_CLIENT_SECRET="your_client_secret"
+export BDFS_CLIENT_ID="your_client_id"
+export BDFS_CLIENT_SECRET="your_client_secret"
+export BDFS_TOKEN_PATH="path/to/your/token/file"
+```
+
+Alternatively, you can set the config file path:
+
+```bash
+export BDFS_CONFIG_FILE_PATH="path/to/your/config.toml"
 ```
 
 ### Configuration File
 
-Create a configuration file at `~/.local/app/bdfs/config.toml`:
+Create a configuration file at `~/.local/app/bdfs/config.toml` or specify a custom path with `BDFS_CONFIG_FILE_PATH`:
 
 ```toml
 # Direct configuration
 client_id = "your_client_id"
 client_secret = "your_client_secret"
-```
-
-Or with the `[baidu]` table:
-
-```toml
-[baidu]
-client_id = "your_client_id"
-client_secret = "your_client_secret"
+token_path = "path/to/your/token/file"
 ```
 
 ## Usage
@@ -230,7 +230,7 @@ go-bdfs <command> -h  # for specific command help
 
 ## Authentication and Token Storage
 
-The tool automatically handles the OAuth 2.0 device authorization flow and stores the access token in `~/.local/app/bdfs/.bdfs_certs`. The tool also automatically refreshes the token when it expires.
+The tool automatically handles the OAuth 2.0 device authorization flow and stores the access token in the file specified by the `token_path` configuration parameter. The tool also automatically refreshes the token when it expires.
 
 ## Contributing
 
