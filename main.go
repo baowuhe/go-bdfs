@@ -14,6 +14,8 @@ import (
 	"github.com/spf13/pflag"
 )
 
+const VERSION = "v0.1.2"
+
 func main() {
 	if len(os.Args) < 2 {
 		fmt.Println("go-bdfs: Baidu Pan client")
@@ -31,9 +33,23 @@ func main() {
 		fmt.Println("  if          Get information about a file in Baidu Pan")
 		fmt.Println("  di          Get disk information (storage usage) from Baidu Pan")
 		fmt.Println("  ar          Refresh the access token using the refresh token")
+		fmt.Println("  version     Show the version information")
 		fmt.Println("")
 		fmt.Println("Use 'go-bdfs <command> -h' for more information about a command.")
 		os.Exit(1)
+	}
+
+	// Parse command
+	cmd := os.Args[1]
+
+	// Handle commands that don't require authorization first
+	switch strings.ToLower(cmd) {
+	case "version":
+		versionCommand()
+		return
+	case "help", "-h", "--help":
+		showHelp()
+		return
 	}
 
 	// Load configuration from environment variables or TOML file
@@ -54,7 +70,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	// Create a new Baidu Pan client
+	// For all other commands, load the client and perform authorization
 	client := pan.NewClient(config.ClientID, config.ClientSecret)
 
 	// Set a timeout for authorization
@@ -70,8 +86,6 @@ func main() {
 		os.Exit(1)
 	}
 
-	// Parse command
-	cmd := os.Args[1]
 	// Execute requested command
 	switch strings.ToLower(cmd) {
 	case "ls":
@@ -96,8 +110,6 @@ func main() {
 		diskInfoCommand(client)
 	case "ar":
 		refreshTokenCommand(client)
-	case "help", "-h", "--help":
-		showHelp()
 	default:
 		pan.PrintError(fmt.Sprintf("Unknown command: %s", cmd))
 		fmt.Println("Run 'go-bdfs' for usage information.")
@@ -609,6 +621,24 @@ func refreshTokenCommand(client *pan.Client) {
 	}
 }
 
+func versionCommand() {
+	versionFlags := pflag.NewFlagSet("version", pflag.ExitOnError)
+	var help bool
+
+	versionFlags.BoolVarP(&help, "help", "h", false, "Show help for version command")
+
+	if err := versionFlags.Parse(os.Args[2:]); err != nil {
+		return
+	}
+
+	if help {
+		versionFlags.PrintDefaults()
+		return
+	}
+
+	fmt.Printf("go-bdfs version %s\n", VERSION)
+}
+
 func showHelp() {
 	fmt.Println("go-bdfs: Baidu Pan client")
 	fmt.Println("Usage: go-bdfs <command> [arguments]")
@@ -656,6 +686,10 @@ func showHelp() {
 	fmt.Println("")
 	fmt.Println("  ar          Refresh the access token using the refresh token")
 	fmt.Println("              Usage: go-bdfs ar")
+	fmt.Println("              Flags: -h, --help (optional)")
+	fmt.Println("")
+	fmt.Println("  version     Show the version information")
+	fmt.Println("              Usage: go-bdfs version")
 	fmt.Println("              Flags: -h, --help (optional)")
 	fmt.Println("")
 	fmt.Println("  help        Show this help message")
