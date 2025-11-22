@@ -11,10 +11,62 @@ import (
 
 	pan "github.com/baowuhe/go-bdfs/pan"
 
+	"github.com/pelletier/go-toml/v2"
 	"github.com/spf13/pflag"
 )
 
 const VERSION = "v0.1.2"
+
+// Config represents the configuration structure
+type Config struct {
+	ClientID     string `toml:"client_id"`
+	ClientSecret string `toml:"client_secret"`
+	TokenPath    string `toml:"token_path"`
+}
+
+// LoadConfig loads configuration from environment variables or TOML file
+func LoadConfig() (*Config, error) {
+	config := &Config{}
+
+	// First, try to get config file path from environment variable
+	configFilePath := os.Getenv("BDFS_CONFIG_FILE_PATH")
+	if configFilePath == "" {
+		// If BDFS_CONFIG_FILE_PATH is not set, use default path
+		homeDir, err := os.UserHomeDir()
+		if err != nil {
+			return nil, fmt.Errorf("failed to get home directory: %w", err)
+		}
+		configFilePath = filepath.Join(homeDir, ".local", "app", "bdfs", "config.toml")
+	}
+
+	// Try to load from config file first
+	if _, err := os.Stat(configFilePath); err == nil {
+		// Config file exists, read it
+		data, err := os.ReadFile(configFilePath)
+		if err != nil {
+			return nil, fmt.Errorf("failed to read config file: %w", err)
+		}
+
+		err = toml.Unmarshal(data, config)
+		if err != nil {
+			return nil, fmt.Errorf("failed to parse config file: %w", err)
+		}
+	} else {
+		// Config file doesn't exist, try loading from environment variables
+		config.ClientID = os.Getenv("BDFS_CLIENT_ID")
+		config.ClientSecret = os.Getenv("BDFS_CLIENT_SECRET")
+		config.TokenPath = os.Getenv("BDFS_TOKEN_PATH")
+	}
+
+	// Validate that all required parameters are provided
+	if config.ClientID == "" || config.ClientSecret == "" || config.TokenPath == "" {
+		return nil, fmt.Errorf("missing required configuration parameters. Please set either:\n" +
+			"  1. BDFS_CONFIG_FILE_PATH environment variable pointing to a TOML file with client_id, client_secret, and token_path, or\n" +
+			"  2. BDFS_CLIENT_ID, BDFS_CLIENT_SECRET, and BDFS_TOKEN_PATH environment variables")
+	}
+
+	return config, nil
+}
 
 func main() {
 	if len(os.Args) < 2 {
@@ -53,25 +105,24 @@ func main() {
 	}
 
 	// Load configuration from environment variables or TOML file
-	config, err := pan.LoadConfig()
+	config, err := LoadConfig()
 	if err != nil {
 		pan.PrintError(fmt.Sprintf("Error loading configuration: %v", err))
-		fmt.Println("You can set BDU_PAN_CLIENT_ID and BDU_PAN_CLIENT_SECRET environment variables")
-		fmt.Println("Or create a config file at $HOME/.local/app/bdfs/config.toml with one of the following formats:")
+		fmt.Println("You can set BDFS_CLIENT_ID, BDFS_CLIENT_SECRET, and BDFS_TOKEN_PATH environment variables")
+		fmt.Println("Or create a config file at $HOME/.local/app/bdfs/config.toml with the following format:")
 		fmt.Println("")
-		fmt.Println("Format 1 (direct values):")
+		fmt.Println("Format (direct values):")
 		fmt.Println("client_id = \"your_client_id\"")
 		fmt.Println("client_secret = \"your_client_secret\"")
+		fmt.Println("token_path = \"path/to/your/token/file\"")
 		fmt.Println("")
-		fmt.Println("Format 2 (under [baidu] table):")
-		fmt.Println("[baidu]")
-		fmt.Println("client_id = \"your_client_id\"")
-		fmt.Println("client_secret = \"your_client_secret\"")
+		fmt.Println("Alternatively, set the BDFS_CONFIG_FILE_PATH environment variable to point to your config file")
+		fmt.Println("[×] Launch failed!ss")
 		os.Exit(1)
 	}
 
 	// For all other commands, load the client and perform authorization
-	client := pan.NewClient(config.ClientID, config.ClientSecret)
+	client := pan.NewClient(config.ClientID, config.ClientSecret, config.TokenPath)
 
 	// Set a timeout for authorization
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)

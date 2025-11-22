@@ -12,8 +12,6 @@ import (
 	"path/filepath"
 	"strings"
 	"time"
-
-	"github.com/pelletier/go-toml/v2"
 )
 
 const (
@@ -113,17 +111,6 @@ type CreateFileResponse struct {
 	ParentPath     string `json:"parent_path"`
 }
 
-// Config represents the configuration structure
-type Config struct {
-	ClientID     string      `toml:"client_id"`
-	ClientSecret string      `toml:"client_secret"`
-	Baidu        BaiduConfig `toml:"baidu,omitempty"`
-}
-
-type BaiduConfig struct {
-	ClientID     string `toml:"client_id"`
-	ClientSecret string `toml:"client_secret"`
-}
 
 // TokenFile represents the structure for storing tokens in a file
 type TokenFile struct {
@@ -149,11 +136,7 @@ type Client struct {
 }
 
 // NewClient creates a new Baidu Pan client
-func NewClient(clientID, clientSecret string) *Client {
-	// Get the home directory
-	homeDir, _ := os.UserHomeDir()
-	tokenPath := filepath.Join(homeDir, ".local", "app", "bdfs", ".bdfs_certs")
-
+func NewClient(clientID, clientSecret, tokenPath string) *Client {
 	// Ensure the directory exists
 	tokenDir := filepath.Dir(tokenPath)
 	os.MkdirAll(tokenDir, 0755)
@@ -450,58 +433,6 @@ func (c *Client) HasValidToken() bool {
 	return err == nil
 }
 
-// LoadConfig loads configuration from environment variables or TOML file
-func LoadConfig() (*Config, error) {
-	config := &Config{}
-
-	// First, try to load from environment variables
-	clientID := os.Getenv("BDU_PAN_CLIENT_ID")
-	clientSecret := os.Getenv("BDU_PAN_CLIENT_SECRET")
-
-	if clientID != "" && clientSecret != "" {
-		config.ClientID = clientID
-		config.ClientSecret = clientSecret
-		return config, nil
-	}
-
-	// If environment variables are not set, try loading from TOML file
-	homeDir, err := os.UserHomeDir()
-	if err != nil {
-		return nil, fmt.Errorf("failed to get home directory: %w", err)
-	}
-
-	configPath := filepath.Join(homeDir, ".local", "app", "bdfs", "config.toml")
-
-	// Check if the config file exists
-	if _, err := os.Stat(configPath); os.IsNotExist(err) {
-		return nil, fmt.Errorf("config file does not exist at %s and environment variables are not set", configPath)
-	}
-
-	// Read and parse the TOML file
-	data, err := os.ReadFile(configPath)
-	if err != nil {
-		return nil, fmt.Errorf("failed to read config file: %w", err)
-	}
-
-	err = toml.Unmarshal(data, config)
-	if err != nil {
-		return nil, fmt.Errorf("failed to parse config file: %w", err)
-	}
-
-	// Check if credentials are directly in the root of the TOML file
-	if config.ClientID != "" && config.ClientSecret != "" {
-		return config, nil
-	}
-
-	// Check if credentials are under the [baidu] table
-	if config.Baidu.ClientID != "" && config.Baidu.ClientSecret != "" {
-		config.ClientID = config.Baidu.ClientID
-		config.ClientSecret = config.Baidu.ClientSecret
-		return config, nil
-	}
-
-	return nil, fmt.Errorf("config file must contain client_id and client_secret either at the root level or under [baidu] table")
-}
 
 // IsTokenExpired checks if the token is expired or will expire soon (within 2 days)
 func (c *Client) IsTokenExpired() bool {
